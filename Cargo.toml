@@ -9,3 +9,4 @@ edition = "2018"
 
 ide = { version = "*", package = "ra_ap_ide" }
 ide_db = { version = "*", package = "ra_ap_ide_db" }
+graph-proc-macros = {path = "proc-macro"}
