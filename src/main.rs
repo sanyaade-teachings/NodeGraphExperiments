@@ -1,6 +1,15 @@
 use ide::{Analysis, DiagnosticsConfig};
 use std::any::Any;
 
+macro_rules! eval {
+    ($n:expr, $t:expr) => {{
+        ($n.func)(Box::new($t)).downcast().unwrap()
+    }};
+    ($n:expr, $t:expr, $ty:ty) => {{
+        ($n.func)(Box::new($t)).downcast::<$ty>().unwrap()
+    }}
+}
+
 struct Node {
     func: Box<dyn Fn(Box<dyn Any>) -> Box<dyn Any>>,
     code: String,
@@ -8,6 +17,12 @@ struct Node {
     args: String,
 }
 
+impl std::ops::Mul<Self> for Node {
+    type Output = Self;
+    fn mul(self, other: Self) -> Self {
+        compose(self, other)
+    }
+}
 
 fn compose(g: Node, f: Node) -> Node {
     let Node{func, code,  args, return_type} = f;
@@ -52,9 +67,8 @@ pub fn check_code(code: String) {
 fn main() {
     let gen_int = gen_int();
     let format_int = format_int();
-    let comp = compose(format_int, gen_int);
-
-    println!("{:?}", (comp.func)(Box::new(())).downcast_ref::<String>());
+    let comp = format_int * gen_int;
+    println!("{:?}", eval!(comp, (), String));
     /*let function = TEST_FN;
     println!("{}", function);
     check_code(function.to_string());*/
