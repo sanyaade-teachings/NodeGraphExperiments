@@ -1,4 +1,3 @@
-use ide::{Analysis, DiagnosticsConfig};
 use std::any::Any;
 
 macro_rules! eval {
@@ -50,7 +49,9 @@ fn format_int(x: u32, y: u32) -> String {
 }
 
 
+#[cfg(rust_analyzer)]
 pub fn check_code(code: String) {
+    use ide::{Analysis, DiagnosticsConfig};
     let (analysis, file_id) = Analysis::from_single_file(code);
     let config = DiagnosticsConfig::default();
 
@@ -65,11 +66,9 @@ pub fn check_code(code: String) {
 }
 
 fn main() {
-    let gen_int = gen_int();
-    let format_int = format_int();
-    let comp = format_int * gen_int;
-    println!("{:?}", eval!(comp, (), String));
-    /*let function = TEST_FN;
+    println!("{:?}", eval!(format_int() * gen_int(), (), String));
+    let function = format_int().code;
     println!("{}", function);
-    check_code(function.to_string());*/
+    #[cfg(rust_analyzer)]
+    check_code(function.to_string());
 }

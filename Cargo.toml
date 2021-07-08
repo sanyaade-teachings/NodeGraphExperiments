@@ -5,8 +5,10 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[dependencies]
+[features]
+rust_analyzer = ["ide", "ide_db"]
 
-ide = { version = "*", package = "ra_ap_ide" }
-ide_db = { version = "*", package = "ra_ap_ide_db" }
+[dependencies]
+ide = { version = "*", package = "ra_ap_ide", optional = true }
+ide_db = { version = "*", package = "ra_ap_ide_db" , optional = true }
 graph-proc-macros = {path = "proc-macro"}
