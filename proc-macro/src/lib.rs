@@ -40,6 +40,7 @@ fn generate_to_string(parsed: ItemFn, string: String) -> TokenStream {
     //let fn_body = parsed.block; // function body
     let sig = parsed.sig; // function signature
     //let vis = parsed.vis; // visibility, pub or not
+    let generics = sig.generics;
     let fn_args = sig.inputs; // comma separated args
     let fn_return_type = sig.output; // return type
     let fn_name = sig.ident; // function name/identifier
@@ -48,18 +49,20 @@ fn generate_to_string(parsed: ItemFn, string: String) -> TokenStream {
     let types = types.iter().map(|t| t.to_token_stream()).collect::<Vec<_>>();
     let idents = idents.iter().map(|t| t.to_token_stream()).collect::<Vec<_>>();
 
+    let node_fn_name = syn::Ident::new(&(fn_name.to_string() + "_node"), proc_macro2::Span::call_site()); // function name/identifier
     let return_type_string = fn_return_type.to_token_stream().to_string().replace("->","");
     let arg_type_string = types.iter().map(|t|t.to_string()).collect::<Vec<_>>().join(", ");
     let error = format!("called {} with the wrong type", fn_name.to_string());
 
     let x = quote! {
-        fn #fn_name() -> Node {
+        //#whole_function
+        fn #node_fn_name #generics() -> Node {
             Node { func: Box::new(move |x| {
-               let  args = x.downcast_ref::<(#(#types,)*)>().expect(#error);
-               let  (#(#idents,)*) = args;
+               let  args = x.downcast::<(#(#types,)*)>().expect(#error);
+               let  (#(#idents,)*) = *args;
                #whole_function
 
-               Box::new(#fn_name(#(*#idents,)*))
+               Box::new(#fn_name(#(#idents,)*))
             }),
             code:  #string.to_string(),
              return_type: #return_type_string.trim().to_string(),
