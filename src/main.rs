@@ -97,15 +97,7 @@ fn node_after_fn(g: Node, f: Box<dyn Fn(Box<dyn Any>) -> Box<dyn Any>>) -> Node 
 
 #[graph_proc_macros::to_node]
 fn node_from_fn(f: Box<dyn Fn(Box<dyn Any>) -> Box<dyn Any>>) -> Node {
-    let Node {
-        func, return_type, ..
-    } = id_node::<Box<dyn Any>>();
-    Node {
-        func: compose(func, f),
-        code: "unimplemented".to_string(),
-        return_type,
-        args: "".to_string(),
-    }
+    node_after_fn_node().eval((id_node::<Box<dyn Any>>, f))
 }
 
 fn main() {
